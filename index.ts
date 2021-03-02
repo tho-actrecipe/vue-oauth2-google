@@ -162,7 +162,7 @@ function installGoogleAuthPlugin(Vue: typeof _Vue, options?: any): void {
     // set config
     let GoogleAuthConfig: any = null;
     const GoogleAuthDefaultConfig = {
-        scope: 'https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/spreadsheets',
+        scope: 'https://www.googleapis.com/auth/drive',
         cookie_policy: 'single_host_origin',
         fetch_basic_profile: false,
         access_type: 'offline',

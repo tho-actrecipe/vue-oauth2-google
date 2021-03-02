@@ -1,6 +1,6 @@
 {
   "name": "vue-oauth2-google",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Forked from vue-google-oauth2",
   "main": "index.js",
   "types": "index.ts",
