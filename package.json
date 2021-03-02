@@ -1,0 +1,28 @@
+{
+  "name": "vue-oauth2-google",
+  "version": "1.0.0",
+  "description": "Forked from vue-google-oauth2",
+  "main": "index.js",
+  "types": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tho-asterist/vue-oauth2-google.git"
+  },
+  "keywords": [
+    "vue",
+    "google",
+    "authentication",
+    "gapi",
+    "oauth2",
+    "google drive"
+  ],
+  "author": "Tho Nguyen <tho.nguyen@asterist.com> (Asterist Inc.)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tho-asterist/vue-oauth2-google/issues"
+  },
+  "homepage": "https://github.com/tho-asterist/vue-oauth2-google#readme"
+}
