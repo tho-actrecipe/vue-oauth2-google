@@ -163,10 +163,11 @@ function installGoogleAuthPlugin(Vue, options) {
   // Install Vue plugin
   Vue.gAuth = googleAuth
   Object.defineProperties(Vue.prototype, {
-      $gAuth: {
+      $googleAuth: {
           get: function () {
               return Vue.gAuth
-          }
+          },
+          configurable: true
       }
   })
   Vue.gAuth.load(GoogleAuthConfig, prompt)
