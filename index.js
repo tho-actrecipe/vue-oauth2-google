@@ -41,7 +41,6 @@ var googleAuth = (function () {
       this.prompt = null
       this.isLoaded = function () {
           /* eslint-disable */
-          console.warn('isLoaded() will be deprecated. You can use "this.$gAuth.isInit"')
           return !!this.GoogleAuth
       };
 

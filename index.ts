@@ -44,7 +44,6 @@ const googleAuth = ((): any => {
         this.prompt = null;
         this.isLoaded = () => {
             // tslint:disable-next-line
-            console.warn('isLoaded() will be deprecated. You can use "this.$gAuth.isInit"');
             return !!this.GoogleAuth;
         };
 
@@ -59,8 +58,8 @@ const googleAuth = ((): any => {
                     this.prompt = prompt;
                     this.isAuthorized = this.GoogleAuth.isSignedIn.get();
                 }).catch((error) => {
-                console.error(error);
-            });
+                    console.error(error);
+                });
         };
 
         this.signIn = (successCallback: any, errorCallback: any) => {
