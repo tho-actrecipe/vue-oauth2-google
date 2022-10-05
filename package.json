@@ -1,9 +1,8 @@
 {
   "name": "vue-oauth2-google",
-  "version": "1.0.5",
-  "description": "Forked from vue-google-oauth2",
+  "version": "1.0.20",
+  "description": "Using the Google Identity Services authorization code model a popup dialog for user consent and callback handler to receive the authorization code from Google.",
   "main": "index.js",
-  "types": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -15,14 +14,17 @@
     "vue",
     "google",
     "authentication",
-    "gapi",
     "oauth2",
-    "google drive"
+    "Google Identity Services"
   ],
-  "author": "Tho Nguyen <tho.nguyen@asterist.com> (Asterist Inc.)",
+  "author": "Asterist Inc.",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/tho-asterist/vue-oauth2-google/issues"
   },
-  "homepage": "https://github.com/tho-asterist/vue-oauth2-google#readme"
+  "homepage": "https://github.com/tho-asterist/vue-oauth2-google#readme",
+  "dependencies": {
+    "vue": "^2.6.0"
+  },
+  "devDependencies": {}
 }

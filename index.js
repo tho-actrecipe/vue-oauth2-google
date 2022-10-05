@@ -1,175 +1,100 @@
+let googleAuth = (function () {
+    function Auth() {
+        this.installClient = () => {
+            let apiUrl = "https://accounts.google.com/gsi/client";
+            return new Promise((resolve) => {
+                let script = document.createElement("script");
+                script.id = "gsi-client"
+                script.src = apiUrl;
+                script.onreadystatechange = script.onload = function () {
+                    if (!script.readyState || /loaded|complete/.test(script.readyState)) {
+                        setTimeout(function () {
+                            resolve();
+                        }, 500);
+                    }
+                };
+                document.getElementsByTagName("head")[0].appendChild(script);
+            });
+        }
 
-var googleAuth = (function () {
+        this.initClient = (config) => {
+            this.config = config
+            return new Promise((resolve, reject) => {
+                try {
+                    this.code_client = google.accounts.oauth2.initCodeClient({
+                        client_id: config.clientId,
+                        scope: config.scope,
+                        ux_mode: 'popup',
+                        callback: (response) => {
+                            if (response.code) {
+                                config.successCallback(response.code)
+                            } else {
+                                config.errorCallback(response)
+                            }
+                        },
+                    });
+                    resolve(this)
+                } catch(error) {
+                    reject(error)
+                }
+            })
+        }
 
-  function installClient() {
-      var apiUrl = 'https://apis.google.com/js/api.js'
-      return new Promise((resolve) => {
-          var script = document.createElement('script')
-          script.src = apiUrl
-          script.onreadystatechange = script.onload = function () {
-              if (!script.readyState || /loaded|complete/.test(script.readyState)) {
-                  setTimeout(function () {
-                      resolve()
-                  }, 500)
-              }
-          }
-          document.getElementsByTagName('head')[0].appendChild(script)
-      })
-  }
+        if (!(this instanceof Auth)) return new Auth();
 
-  function initClient(config) {
-      return new Promise((resolve, reject) => {
-          window.gapi.load('auth2', () => {
-              window.gapi.auth2.init(config)
-                  .then(() => {
-                      resolve(window.gapi)
-                  }).catch((error) => {
-                      reject(error)
-                  })
-          })
-      })
+        this.load = (config) => {
+            this.installClient()
+                .then(() => {
+                    this.initClient(config)
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+        };
 
-  }
-
-  function Auth() {
-      if (!(this instanceof Auth)) {
-          return new Auth()
-      }
-      this.GoogleAuth = null /* window.gapi.auth2.getAuthInstance() */
-      this.isAuthorized = false
-      this.isInit = false
-      this.prompt = null
-      this.isLoaded = function () {
-          /* eslint-disable */
-          return !!this.GoogleAuth
-      };
-
-      this.load = (config, prompt) => {
-          installClient()
-              .then(() => {
-                  return initClient(config)
-              })
-              .then((gapi) => {
-                  this.GoogleAuth = gapi.auth2.getAuthInstance()
-                  this.isInit = true
-                  this.prompt = prompt
-                  this.isAuthorized = this.GoogleAuth.isSignedIn.get()
-              }).catch((error) => {
-                  console.error(error)
-              })
-      };
-
-      this.signIn = (successCallback, errorCallback) => {
-          return new Promise((resolve, reject) => {
-              if (!this.GoogleAuth) {
-                  if (typeof errorCallback === 'function') errorCallback(false)
-                  reject(false)
-                  return
-              }
-              this.GoogleAuth.signIn()
-                  .then(googleUser => {
-                      if (typeof successCallback === 'function') successCallback(googleUser)
-                      this.isAuthorized = this.GoogleAuth.isSignedIn.get()
-                      resolve(googleUser)
-                  })
-                  .catch(error => {
-                      if (typeof errorCallback === 'function') errorCallback(error)
-                      reject(error)
-                  })
-          })
-      };
-
-      this.getAuthCodeWithOption = (options, successCallback, errorCallback) => {
-          return new Promise((resolve, reject) => {
-              if (!this.GoogleAuth) {
-                  if (typeof errorCallback === 'function') errorCallback(false)
-                  reject(false)
-                  return;
-              }
-              let option = { prompt: this.prompt }
-              if (options && typeof options === 'object') {
-                  if (options.prompt) {
-                      option.prompt = options.prompt
-                  }
-                  if (options.scope) {
-                      option.scope = options.scope
-                  }
-              }
-              this.GoogleAuth.grantOfflineAccess(option)
-                  .then(function (resp) {
-                      if (typeof successCallback === 'function') successCallback(resp.code);
-                      resolve(resp.code)
-                  })
-                  .catch(function (error) {
-                      if (typeof errorCallback === 'function') errorCallback(error)
-                      reject(error)
-                  })
-          })
-      };
-
-      this.getAuthCode = (successCallback, errorCallback) => {
-          return this.getAuthCodeWithOption(null, successCallback, errorCallback)
-      };
-
-      this.signOut = (successCallback, errorCallback) => {
-          return new Promise((resolve, reject) => {
-              if (!this.GoogleAuth) {
-                  if (typeof errorCallback === 'function') errorCallback(false)
-                  reject(false)
-                  return
-              }
-              this.GoogleAuth.signOut()
-                  .then(() => {
-                      if (typeof successCallback === 'function') successCallback()
-                      this.isAuthorized = false
-                      resolve(true)
-                  })
-                  .catch(error => {
-                      if (typeof errorCallback === 'function') errorCallback(error)
-                      reject(error)
-                  })
-          })
-      };
-  }
-
-  return new Auth()
+        this.getAuthCode = () => {
+            const focusEventHandler = () => {
+                this.config.errorCallback({
+                    error: 'popup_closed_by_user',
+                });
+                window.removeEventListener('focus', focusEventHandler);
+            };
+            // adding an event listener to detect if user is back to the webpage
+            // if the user "focus" back to window then we shall close the current auth session
+            window.addEventListener('focus', focusEventHandler);
+            this.code_client.requestCode()
+        };
+    }
+    return new Auth();
 })();
 
-
 function installGoogleAuthPlugin(Vue, options) {
-  /* eslint-disable */
-  // Set config
-  let GoogleAuthConfig = null
-  let GoogleAuthDefaultConfig = {
-      scope: 'profile email',
-      cookie_policy: 'single_host_origin',
-      fetch_basic_profile: false,
-      access_type: 'offline',
-      response_type: 'token'
-  }
-  let prompt = 'consent'
-  if (typeof options === 'object') {
-      GoogleAuthConfig = Object.assign(GoogleAuthDefaultConfig, options)
-      if (options.scope) GoogleAuthConfig.scope = options.scope
-      if (options.prompt) prompt = options.prompt
-      if (!options.clientId) {
-          console.warn('clientId is required')
-      }
-  } else {
-      console.warn('Invalid option type. Object type accepted only.')
-  }
+    /* eslint-disable */
+    // set config
+    let GoogleAuthConfig = null;
+    let GoogleAuthDefaultConfig = {
+        scope: 'profile email',
+    };
+    if (typeof options === "object") {
+        GoogleAuthConfig = Object.assign(GoogleAuthDefaultConfig, options);
+        if (options.scope) GoogleAuthConfig.scope = options.scope;
+        if (!options.clientId) {
+            console.warn("ClientId is required.");
+        }
+    } else {
+        console.warn("Invalid option type. Object type accepted only.");
+    }
 
-  // Install Vue plugin
-  Vue.gAuth = googleAuth
-  Object.defineProperties(Vue.prototype, {
-      $googleAuth: {
-          get: function () {
-              return Vue.gAuth
-          },
-          configurable: true
-      }
-  })
-  Vue.gAuth.load(GoogleAuthConfig, prompt)
+    // Install Vue plugin
+    Vue.gAuth = googleAuth;
+    Object.defineProperties(Vue.prototype, {
+        $googleAuth: {
+            get: function () {
+                return Vue.gAuth;
+            },
+        },
+    });
+    Vue.gAuth.load(GoogleAuthConfig);
 }
 
-export default installGoogleAuthPlugin
+export default installGoogleAuthPlugin;
